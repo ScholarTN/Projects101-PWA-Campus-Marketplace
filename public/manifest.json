@@ -1,0 +1,113 @@
+{
+  "name": "Campus Marketplace",
+  "short_name": "CampusMarket",
+  "description": "A marketplace for students to buy/sell items and find housing",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#317EFB",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "description": "Home page showing featured items and housing"
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "description": "Item listing page with search functionality"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://your-campus-marketplace-url.com"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Buy Items",
+      "short_name": "Buy",
+      "description": "Browse items for sale",
+      "url": "/buy",
+      "icons": [{ "src": "/icons/buy-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Find Housing",
+      "short_name": "Housing",
+      "description": "Search for rooms and apartments",
+      "url": "/housing",
+      "icons": [{ "src": "/icons/housing-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Sell Items",
+      "short_name": "Sell",
+      "description": "List your items for sale",
+      "url": "/sell",
+      "icons": [{ "src": "/icons/sell-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["shopping", "social", "housing"],
+  "iarc_rating_id": "e84b072d",
+  "features": [
+    "Cross Platform",
+    "fast",
+    "simple"
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "name",
+      "text": "description",
+      "url": "link"
+    }
+  }
+}
