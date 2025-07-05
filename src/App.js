@@ -15,6 +15,7 @@ import SearchResults from './pages/SearchResults';
 import PrivateRoute from './components/PrivateRoute';
 import { useAuth } from './context/AuthContext';
 
+
 function App() {
   const { currentUser } = useAuth();
 
