@@ -1,0 +1,138 @@
+.container {
+    background-color: #fff;
+    margin-top: 20px;
+    padding:20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+    max-width: 600px; /* Increased max-width for larger screens */
+    width: 100%;
+    margin: auto; /* Centered the container */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Added transform transition */
+}
+
+.container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+    color: #ffc107; /* Accent color */
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600; /* Use semibold for heading */
+    letter-spacing: -0.02em;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 4px;
+    margin-bottom: 5px;
+    color: #495057; /* Slightly darker label color */
+    font-weight: 600;
+    transition: color 0.2s ease; /* Label transition */
+}
+
+label:hover {
+    color: #ffc107;
+}
+
+input[type="text"],input[type="number"],input[type="date"],input[type="file"],
+textarea {
+    width: calc(100% - 20px); /* Adjusted width for padding */
+    padding: 8px;
+    border: 1px solid #e0e0e0; /* Lighter border */
+    border-radius: 6px;
+    margin-bottom: 4px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow transition */
+    font-size: 1rem;
+    background-color: #f7f7f7; /* Slightly lighter input background */
+    color: #495057;
+}
+
+input[type="text"]:focus,input[type="number"]:focus,input[type="date"]:focus,input[type="file"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #ffc107; /* Focus color */
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15); /* Focus shadow */
+}
+
+textarea {
+    resize: vertical;
+    height: 120px; /* Increased default height */
+}
+
+button[type="submit"] {
+    background-color: #ffc107;
+    color: #0c3057;
+    border: none;
+    margin-top: 12px;
+    padding: 12px 25px; /* Slightly adjusted padding */
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem; /* Slightly larger font */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Added box-shadow */
+    font-weight: 600; /* Semi-bold button text */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+button[type="submit"]:hover {
+    background-color: #ffb300; /* Slightly darker hover */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.2);
+}
+
+button[type="submit"]:active {
+    background-color: #ffa000; /* Even darker active */
+    transform: translateY(0);
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+}
+
+#response {
+    margin-top: 10px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.03); /* Very light background */
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.08); /* Very light border */
+    text-align: center;
+    font-size: 1rem;
+    color: #343a40;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) { /* Medium screens and below */
+    .container {
+        padding: 30px;
+    }
+    input[type="text"],
+    textarea {
+        width: calc(100% - 16px);
+        padding: 10px;
+    }
+    button[type="submit"] {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container{
+        padding: 20px;
+    }
+    h2 {
+        font-size: 1.8rem;
+    }
+}
