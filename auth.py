@@ -14,7 +14,7 @@ def login():
         })
         if res.user:
             st.session_state.user = res.user
-            st.success("Logged in")
+            st.success("Logged in successfully")
 
     if st.button("Sign Up"):
         supabase.auth.sign_up({
