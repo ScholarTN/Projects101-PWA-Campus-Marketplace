@@ -1,28 +1,48 @@
 import streamlit as st
 from auth import login
-from listings import create_listing
+from listings import create_listing, view_listings
 
-st.set_page_config(page_title="Campus Marketplace", layout="wide")
+st.set_page_config(
+    page_title="Campus Marketplace",
+    layout="wide"
+)
 
-# Initialize page state
+# ----------------------------
+# Session state initialization
+# ----------------------------
 if "page" not in st.session_state:
     st.session_state.page = "login"
 
 st.title("Campus Marketplace")
 
-# Navigation logic
+# ----------------------------
+# Page router
+# ----------------------------
 if st.session_state.page == "login":
     login()
 
 elif st.session_state.page == "home":
-    st.success(f"Welcome! You are logged in.")
-    st.button("Create Listing", on_click=lambda: set_page("create_listing"))
+    st.success("Welcome to Campus Marketplace")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("➕ Create Listing"):
+            st.session_state.page = "create_listing"
+            st.rerun()
+
+    with col2:
+        if st.button("🔄 Refresh Listings"):
+            st.rerun()
+
+    st.divider()
+
+    # Amazon-style listings feed
+    view_listings()
 
 elif st.session_state.page == "create_listing":
     create_listing(st.session_state.user)
-    st.button("Back to Home", on_click=lambda: set_page("home"))
 
-
-def set_page(page_name):
-    st.session_state.page = page_name
-    st.rerun()
+    if st.button("⬅ Back to Home"):
+        st.session_state.page = "home"
+        st.rerun()
