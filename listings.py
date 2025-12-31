@@ -85,3 +85,4 @@ def view_listings():
                     st.markdown(f"**Listing ID:** `{item['id']}`")
 
             st.divider()
+            
