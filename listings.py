@@ -30,3 +30,58 @@ def create_listing(user):
         }).execute()
 
         st.success("Listing created!")
+
+
+
+def view_listings():
+    st.subheader("Available Listings")
+
+    response = (
+        supabase
+        .from_("listings")
+        .select("*")
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    listings = response.data
+
+    if not listings:
+        st.info("No listings available yet.")
+        return
+
+    for item in listings:
+        with st.container():
+            col_img, col_info = st.columns([1, 3])
+
+            # ---------------- IMAGE COLUMN ----------------
+            with col_img:
+                if item.get("image_urls"):
+                    st.image(
+                        item["image_urls"][0],
+                        width="stretch"
+                    )
+                else:
+                    st.image(
+                        "https://via.placeholder.com/200x200?text=No+Image",
+                        width="stretch"
+                    )
+
+            # ---------------- INFO COLUMN ----------------
+            with col_info:
+                st.markdown(f"### {item['title']}")
+                st.markdown(f"**₹ {item['price']}**")
+                st.markdown(f"**Category:** {item['category']}")
+                st.markdown(f"**Type:** {item['type']}")
+
+                # Short preview
+                if item.get("description"):
+                    preview = item["description"][:120]
+                    st.markdown(preview + "...")
+
+                # Expandable details (Amazon-style)
+                with st.expander("View more details"):
+                    st.markdown(f"**Full Description:**\n\n{item['description']}")
+                    st.markdown(f"**Listing ID:** `{item['id']}`")
+
+            st.divider()
