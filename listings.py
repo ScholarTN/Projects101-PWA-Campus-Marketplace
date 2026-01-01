@@ -142,7 +142,7 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                                 if response.status_code == 200:
                                     st.image(
                                         item["image_urls"][0],
-                                        width=300,  # Fixed width instead of use_column_width
+                                        width=300,
                                         caption="Click to enlarge"
                                     )
                                 else:

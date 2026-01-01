@@ -16,7 +16,7 @@ if "page" not in st.session_state:
 if "search_query" not in st.session_state:
     st.session_state.search_query = ""
 if "price_range" not in st.session_state:
-    st.session_state.price_range = (0, 10000)
+    st.session_state.price_range = (0, 100000)
 if "category_filter" not in st.session_state:
     st.session_state.category_filter = "All"
 if "user" not in st.session_state:
@@ -102,6 +102,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # Hide warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -146,7 +147,7 @@ elif st.session_state.page == "home":
     st.markdown("---")
     
     # Main layout with sidebar filters
-    col_main, col_sidebar = st.columns([4, 1])
+    col_sidebar, col_main = st.columns([1, 4])
     
     with col_sidebar:
         st.markdown("### 🔍 Filters")
