@@ -14,7 +14,7 @@ st.set_page_config(
 # Session state initialization
 # ----------------------------
 if "page" not in st.session_state:
-    st.session_state.page = "profile" #login is the default
+    st.session_state.page = "login" #login is the default
 if "search_query" not in st.session_state:
     st.session_state.search_query = ""
 if "price_range" not in st.session_state:
@@ -167,11 +167,7 @@ elif st.session_state.page == "home":
     st.markdown("---")
     
     # Main layout with sidebar filters
-<<<<<<< HEAD
     col_sidebar, col_main = st.columns([2, 4])
-=======
-    col_sidebar, col_main = st.columns([1, 4])
->>>>>>> f606d1fd43f952c15e096ade13d0d010eaba4bd0
     
     with col_sidebar:
         st.markdown("### 🔍 Filters")
