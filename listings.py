@@ -88,7 +88,7 @@ def create_listing(user):
             st.session_state.page = "home"
             st.rerun()
 
-def view_listings(search_query="", price_range=(0, 10000), category_filter="All", sort_option="Newest"):
+def view_listings(search_query="", price_range=(0, 100000), category_filter="All", sort_option="Newest"):
     # Build query
     query = supabase.from_("listings").select("*")
     

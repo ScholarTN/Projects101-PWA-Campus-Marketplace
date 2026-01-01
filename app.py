@@ -157,7 +157,7 @@ elif st.session_state.page == "home":
         min_price, max_price = st.slider(
             "Select price range",
             min_value=0,
-            max_value=10000,
+            max_value=100000,
             value=st.session_state.price_range,
             step=100,
             label_visibility="collapsed"
@@ -194,7 +194,7 @@ elif st.session_state.page == "home":
         # Clear filters button
         if st.button("🧹 Clear Filters", use_container_width=True):
             st.session_state.search_query = ""
-            st.session_state.price_range = (0, 10000)
+            st.session_state.price_range = (0, 100000)
             st.session_state.category_filter = "All"
             st.session_state.sort_option = "Newest"
             st.rerun()
@@ -208,7 +208,7 @@ elif st.session_state.page == "home":
         filters_active = []
         if st.session_state.search_query:
             filters_active.append(f"Search: '{st.session_state.search_query}'")
-        if st.session_state.price_range != (0, 10000):
+        if st.session_state.price_range != (0, 100000):
             filters_active.append(f"Price: ₹{st.session_state.price_range[0]}-₹{st.session_state.price_range[1]}")
         if st.session_state.category_filter != "All":
             filters_active.append(f"Category: {st.session_state.category_filter}")
