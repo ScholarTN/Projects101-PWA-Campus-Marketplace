@@ -3,7 +3,7 @@ from auth import login
 from listings import create_listing, view_listings
 
 st.set_page_config(
-    page_title="Campus Marketplace | Amazon Style",
+    page_title="Campus Marketplace",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -22,10 +22,21 @@ if "category_filter" not in st.session_state:
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# Custom CSS for Amazon-like styling
+# Custom CSS for styling and hide warnings
 st.markdown("""
 <style>
-    /* Amazon-like theme */
+    /* Hide Streamlit warnings and errors */
+    .stAlert {
+        display: none !important;
+    }
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    .stException {
+        display: none !important;
+    }
+    
+    /* theme */
     .main {
         background-color: #f3f3f3;
     }
@@ -84,33 +95,16 @@ st.markdown("""
         background-color: #007BFF !important;
         color: white !important;
     }
+    /* Hide Streamlit menu */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------
-# Header with Logo and Navigation
-# ----------------------------
-if st.session_state.page != "login":
-    col1, col2, col3 = st.columns([1, 3, 1])
-    
-    with col1:
-        st.markdown("## 🛒 Campus Marketplace")
-    
-    with col2:
-        search_query = st.text_input(
-            "🔍 Search for items...",
-            value=st.session_state.search_query,
-            key="search_input"
-        )
-        if search_query != st.session_state.search_query:
-            st.session_state.search_query = search_query
-            st.rerun()
-    
-    with col3:
-        if st.button("👤 Logout"):
-            st.session_state.page = "login"
-            st.session_state.user = None
-            st.rerun()
+# Hide warnings
+import warnings
+warnings.filterwarnings("ignore")
 
 # ----------------------------
 # Page router
@@ -119,12 +113,44 @@ if st.session_state.page == "login":
     login()
 
 elif st.session_state.page == "home":
-    st.markdown("<h1 style='text-align: center; color: #232F3E;'>Campus Marketplace</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #565959;'>Your one-stop shop for campus essentials</p>", unsafe_allow_html=True)
+    # Only show minimal header with search and logout
+    col1, col2, col3 = st.columns([2, 4, 2])
     
-    # Filters sidebar
-    with st.sidebar:
+    with col1:
+        # Empty space or minimal logo
+        st.markdown("### 🛒")
+    
+    with col2:
+        search_query = st.text_input(
+            "🔍 Search items, categories, etc...",
+            value=st.session_state.search_query,
+            key="search_input",
+            label_visibility="collapsed",
+            placeholder="Search items, categories, etc..."
+        )
+        if search_query != st.session_state.search_query:
+            st.session_state.search_query = search_query
+            st.rerun()
+    
+    with col3:
+        col3a, col3b = st.columns(2)
+        with col3a:
+            if st.button("👤 Profile", use_container_width=True):
+                st.info("Profile page coming soon!")
+        with col3b:
+            if st.button("🚪 Logout", use_container_width=True):
+                st.session_state.page = "login"
+                st.session_state.user = None
+                st.rerun()
+    
+    st.markdown("---")
+    
+    # Main layout with sidebar filters
+    col_main, col_sidebar = st.columns([4, 1])
+    
+    with col_sidebar:
         st.markdown("### 🔍 Filters")
+        st.markdown("---")
         
         # Price range filter
         st.markdown("**Price Range (₹)**")
@@ -137,10 +163,13 @@ elif st.session_state.page == "home":
             label_visibility="collapsed"
         )
         st.session_state.price_range = (min_price, max_price)
+        st.markdown(f"*₹{min_price} - ₹{max_price}*")
+        
+        st.markdown("---")
         
         # Category filter
         st.markdown("**Category**")
-        categories = ["All", "Housing", "Electronics", "Furniture", "Books", "Other"]
+        categories = ["All", "Housing", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"]
         selected_category = st.selectbox(
             "Select category",
             categories,
@@ -149,59 +178,65 @@ elif st.session_state.page == "home":
         )
         st.session_state.category_filter = selected_category
         
+        st.markdown("---")
+        
         # Sort options
         st.markdown("**Sort By**")
         sort_option = st.selectbox(
             "Sort items by",
-            ["Newest", "Price: Low to High", "Price: High to Low"],
+            ["Newest", "Price: Low to High", "Price: High to Low", "Popular"],
             label_visibility="collapsed"
         )
         st.session_state.sort_option = sort_option
         
+        st.markdown("---")
+        
         # Clear filters button
-        if st.button("Clear All Filters"):
+        if st.button("🧹 Clear Filters", use_container_width=True):
             st.session_state.search_query = ""
             st.session_state.price_range = (0, 10000)
             st.session_state.category_filter = "All"
             st.session_state.sort_option = "Newest"
             st.rerun()
     
-    # Main content area
-    col1, col2 = st.columns([4, 1])
-    
-    with col1:
-        st.markdown(f"### 📦 Available Listings")
-        if st.session_state.search_query:
-            st.markdown(f"*Search results for: '{st.session_state.search_query}'*")
+    with col_main:
+        # Page title and filters summary
+        st.markdown("<h1 style='color: #232F3E; margin-bottom: 10px;'>Campus Marketplace</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color: #565959; margin-top: 0;'>Your one-stop shop for campus essentials</p>", unsafe_allow_html=True)
         
-        # Display active filters
-        filters_text = []
+        # Active filters display
+        filters_active = []
+        if st.session_state.search_query:
+            filters_active.append(f"Search: '{st.session_state.search_query}'")
         if st.session_state.price_range != (0, 10000):
-            filters_text.append(f"Price: ₹{st.session_state.price_range[0]} - ₹{st.session_state.price_range[1]}")
+            filters_active.append(f"Price: ₹{st.session_state.price_range[0]}-₹{st.session_state.price_range[1]}")
         if st.session_state.category_filter != "All":
-            filters_text.append(f"Category: {st.session_state.category_filter}")
-        if filters_text:
-            st.markdown(f"**Active filters:** {', '.join(filters_text)}")
-    
-    with col2:
-        if st.button("➕ Create New Listing", use_container_width=True):
+            filters_active.append(f"Category: {st.session_state.category_filter}")
+        
+        if filters_active:
+            st.markdown(f"**Active filters:** {', '.join(filters_active)}")
+        
+        # Create listing button
+        if st.button("➕ Create New Listing", use_container_width=True, type="primary"):
             st.session_state.page = "create_listing"
             st.rerun()
-    
-    st.divider()
-    
-    # Amazon-style listings feed with filters
-    view_listings(
-        search_query=st.session_state.search_query,
-        price_range=st.session_state.price_range,
-        category_filter=st.session_state.category_filter,
-        sort_option=getattr(st.session_state, 'sort_option', 'Newest')
-    )
+        
+        st.markdown("---")
+        
+        # Display listings
+        view_listings(
+            search_query=st.session_state.search_query,
+            price_range=st.session_state.price_range,
+            category_filter=st.session_state.category_filter,
+            sort_option=getattr(st.session_state, 'sort_option', 'Newest')
+        )
 
 elif st.session_state.page == "create_listing":
     create_listing(st.session_state.user)
     
-    st.divider()
-    if st.button("⬅ Back to Home", use_container_width=True):
-        st.session_state.page = "home"
-        st.rerun()
+    st.markdown("---")
+    col1, col2 = st.columns([4, 1])
+    with col2:
+        if st.button("⬅ Back to Home", use_container_width=True):
+            st.session_state.page = "home"
+            st.rerun()

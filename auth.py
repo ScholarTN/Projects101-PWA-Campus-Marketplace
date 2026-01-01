@@ -17,12 +17,10 @@ def login():
     
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
     
-    # Logo and title
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<h1 style='text-align: center;'>🛒</h1>", unsafe_allow_html=True)
-        st.markdown("<h2 style='text-align: center; color: #232F3E;'>Campus Marketplace</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #565959;'>Login to buy and sell on campus</p>", unsafe_allow_html=True)
+    # Logo and title - ONLY in login page
+    st.markdown("<h1 style='text-align: center;'>🛒</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #232F3E;'>Campus Marketplace</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: #565959;'>Login to buy and sell on campus</p>", unsafe_allow_html=True)
     
     st.divider()
     
@@ -44,11 +42,10 @@ def login():
                     if res.user:
                         st.session_state.user = res.user
                         st.session_state.page = "home"
-                        st.success("Login successful!")
                         st.rerun()
 
                 except Exception as e:
-                    st.error(f"Login failed: Invalid email or password")
+                    st.error("Login failed: Invalid email or password")
             else:
                 st.warning("Please enter both email and password")
     
@@ -62,14 +59,10 @@ def login():
                     })
                     st.success("Account created! Please check your email to verify your account.")
                 except Exception as e:
-                    st.error(f"Signup failed: {str(e)}")
+                    st.error("Signup failed. Please try a different email.")
             else:
                 st.warning("Please enter both email and password")
     
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Demo credentials
-    st.markdown("---")
-    st.markdown("**Demo Credentials:**")
-    st.markdown("- Email: `demo@campus.edu`")
-    st.markdown("- Password: `demo123`")
+    

@@ -2,7 +2,6 @@ import streamlit as st
 from supabase_client import supabase
 from upload import upload_file
 import requests
-from io import BytesIO
 
 def create_listing(user):
     st.markdown("### 📝 Create New Listing")
@@ -52,7 +51,7 @@ def create_listing(user):
                                 url = upload_file(img, "images")
                                 image_urls.append(url)
                             except Exception as e:
-                                st.warning(f"Could not upload {img.name}: {str(e)}")
+                                st.warning(f"Could not upload {img.name}")
                     
                     # Upload video if exists
                     video_url = None
@@ -60,7 +59,7 @@ def create_listing(user):
                         try:
                             video_url = upload_file(video, "videos")
                         except Exception as e:
-                            st.warning(f"Could not upload video: {str(e)}")
+                            st.warning(f"Could not upload video")
                     
                     # Insert into database
                     try:
@@ -81,11 +80,8 @@ def create_listing(user):
                         st.success("✅ Listing created successfully!")
                         st.balloons()
                         
-                        # Clear form
-                        st.session_state.create_listing_clear = True
-                        
                     except Exception as e:
-                        st.error(f"Failed to create listing: {str(e)}")
+                        st.error("Failed to create listing. Please try again.")
     
     with col3:
         if st.button("❌ Cancel", use_container_width=True):
@@ -125,7 +121,7 @@ def view_listings(search_query="", price_range=(0, 10000), category_filter="All"
         
         st.markdown(f"**Found {len(listings)} item(s)**")
         
-        # Display listings in grid (Amazon-style)
+        # Display listings in grid 
         cols_per_row = 3
         for i in range(0, len(listings), cols_per_row):
             cols = st.columns(cols_per_row)
@@ -138,7 +134,7 @@ def view_listings(search_query="", price_range=(0, 10000), category_filter="All"
                         # Create listing card
                         st.markdown('<div class="listing-card">', unsafe_allow_html=True)
                         
-                        # Image section
+                        # Image section - FIXED: Using width parameter instead of use_column_width
                         if item.get("image_urls") and len(item["image_urls"]) > 0:
                             try:
                                 # Check if image URL is accessible
@@ -146,23 +142,23 @@ def view_listings(search_query="", price_range=(0, 10000), category_filter="All"
                                 if response.status_code == 200:
                                     st.image(
                                         item["image_urls"][0],
-                                        use_column_width=True,
+                                        width=300,  # Fixed width instead of use_column_width
                                         caption="Click to enlarge"
                                     )
                                 else:
                                     st.image(
                                         "https://via.placeholder.com/300x200?text=Image+Not+Available",
-                                        use_column_width=True
+                                        width=300
                                     )
                             except:
                                 st.image(
                                     "https://via.placeholder.com/300x200?text=Item+Image",
-                                    use_column_width=True
+                                    width=300
                                 )
                         else:
                             st.image(
                                 "https://via.placeholder.com/300x200?text=No+Image",
-                                use_column_width=True
+                                width=300
                             )
                         
                         # Title and price
@@ -217,7 +213,7 @@ def view_listings(search_query="", price_range=(0, 10000), category_filter="All"
                                 img_cols = st.columns(min(3, len(item["image_urls"])))
                                 for idx, img_url in enumerate(item["image_urls"][:3]):
                                     with img_cols[idx % 3]:
-                                        st.image(img_url, use_column_width=True)
+                                        st.image(img_url, width=150)
                             
                             # Show video if available
                             if item.get("video_url"):
@@ -229,8 +225,7 @@ def view_listings(search_query="", price_range=(0, 10000), category_filter="All"
         # Pagination suggestion
         if len(listings) > 9:
             st.markdown("---")
-            st.markdown("**More items available** - Scroll up to see more!")
+            st.markdown("**More items available** - Use filters to narrow results")
             
     except Exception as e:
-        st.error(f"Error loading listings: {str(e)}")
-        st.info("Please try refreshing the page or check your connection.")
+        st.error("Error loading listings. Please try refreshing the page.")
