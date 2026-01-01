@@ -142,8 +142,13 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                                 if response.status_code == 200:
                                     st.image(
                                         item["image_urls"][0],
+<<<<<<< HEAD
                                         width=300,  # Fixed width instead of use_column_width
                                         caption=f"{item["image_urls"][0]}"
+=======
+                                        width=300,
+                                        caption="Click to enlarge"
+>>>>>>> f606d1fd43f952c15e096ade13d0d010eaba4bd0
                                     )
                                     #or  if response.status_code == 200:
                                     #st.markdown(f"**URLs:** {' '.join(item['image_urls'])}")
