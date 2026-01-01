@@ -1,0 +1,41 @@
+#when logging out add this:
+CookiesManager.clear_session_cookie()
+
+#add this code in any referenced file (auth.py, app.py):
+from cookies_manager import CookiesManager
+
+from auth import checkCookies
+
+#function to check Cookies:
+def checkCookies():
+    cookie_data = CookiesManager.get_session_cookie()
+    if cookie_data is not None:
+        st.session_state.user = supabase.auth.get_user(
+            CookiesManager.get_access_token()
+        ).data.user
+
+        # st.session_state.page = "home"
+        # st.success("Welcome Back!")
+        # st.rerun()
+        CookiesManager.clear_session_cookie()
+        st.session_state.page = "login"
+        st.session_state.user = None
+        st.rerun()
+        return
+    else:
+        #login()
+        st.session_state.page = "home"
+        st.success("Welcome Back!")
+        st.rerun()
+        return
+
+    # st.session_state.user = supabase.auth.get_user(CookiesManager.get_access_token()).data.user
+
+
+# Added this code to create the session cookies
+CookiesManager.set_session_cookie(
+    res.user.id,
+    res.user.email,
+    res.session.access_token,
+    res.session.refresh_token
+)
