@@ -143,21 +143,23 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                                     st.image(
                                         item["image_urls"][0],
                                         width=300,  # Fixed width instead of use_column_width
-                                        caption="Click to enlarge"
+                                        caption=f"{item["image_urls"][0]}"
                                     )
+                                    #or  if response.status_code == 200:
+                                    #st.markdown(f"**URLs:** {' '.join(item['image_urls'])}")
                                 else:
                                     st.image(
-                                        "https://via.placeholder.com/300x200?text=Image+Not+Available",
+                                        "img/cm_pholder.png",
                                         width=300
                                     )
                             except:
                                 st.image(
-                                    "https://via.placeholder.com/300x200?text=Item+Image",
+                                    "img/cm_pholder.png",
                                     width=300
                                 )
                         else:
                             st.image(
-                                "https://via.placeholder.com/300x200?text=No+Image",
+                                "img/cm_pholder.png",
                                 width=300
                             )
                         
@@ -213,12 +215,14 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                                 img_cols = st.columns(min(3, len(item["image_urls"])))
                                 for idx, img_url in enumerate(item["image_urls"][:3]):
                                     with img_cols[idx % 3]:
+                                        st.markdown(f"**Image {img_url}:**")
                                         st.image(img_url, width=150)
                             
                             # Show video if available
                             if item.get("video_url"):
-                                st.markdown("**Video:**")
-                                st.video(item["video_url"])
+                                st.markdown(f"**Videos: {item['video_url']}**")
+                                st.markdown("<style>iframe { width: 100%; height: 300px; }</style>", unsafe_allow_html=True)
+                                st.markdown(f"<iframe src={item['video_url']}></iframe>", unsafe_allow_html=True)
                         
                         st.markdown('</div>', unsafe_allow_html=True)
         

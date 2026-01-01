@@ -1,6 +1,8 @@
 import streamlit as st
 from auth import login
+from profile import profile
 from listings import create_listing, view_listings
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Campus Marketplace",
@@ -12,7 +14,7 @@ st.set_page_config(
 # Session state initialization
 # ----------------------------
 if "page" not in st.session_state:
-    st.session_state.page = "login"
+    st.session_state.page = "profile" #login is the default
 if "search_query" not in st.session_state:
     st.session_state.search_query = ""
 if "price_range" not in st.session_state:
@@ -23,6 +25,18 @@ if "user" not in st.session_state:
     st.session_state.user = None
 
 # Custom CSS for styling and hide warnings
+with open("css/profile.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+components.html(
+    """
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    """,
+    height=0
+)
+
 st.markdown("""
 <style>
     /* Hide Streamlit warnings and errors */
@@ -99,6 +113,7 @@ st.markdown("""
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
+    
 </style>
 """, unsafe_allow_html=True)
 
@@ -111,6 +126,9 @@ warnings.filterwarnings("ignore")
 # ----------------------------
 if st.session_state.page == "login":
     login()
+
+if st.session_state.page == "profile":
+    profile()
 
 elif st.session_state.page == "home":
     # Only show minimal header with search and logout
@@ -136,7 +154,9 @@ elif st.session_state.page == "home":
         col3a, col3b = st.columns(2)
         with col3a:
             if st.button("👤 Profile", use_container_width=True):
-                st.info("Profile page coming soon!")
+                #st.info("Profile page coming soon!")
+                st.session_state.page = "profile"
+                st.rerun()
         with col3b:
             if st.button("🚪 Logout", use_container_width=True):
                 st.session_state.page = "login"
@@ -146,7 +166,7 @@ elif st.session_state.page == "home":
     st.markdown("---")
     
     # Main layout with sidebar filters
-    col_main, col_sidebar = st.columns([4, 1])
+    col_sidebar, col_main = st.columns([2, 4])
     
     with col_sidebar:
         st.markdown("### 🔍 Filters")
