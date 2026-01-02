@@ -13,3 +13,7 @@ Pillow==10.3.0
 
 #do not forget this for cookies: pip install "streamlit-cookies-manager>=0.2.0"
 #verify the above by: pip list | findstr streamlit-cookies-manager  OR  pip show streamlit-cookies-manager
+
+#Very important these ones
+#pip install spacy
+#python -m spacy download en_core_web_sm

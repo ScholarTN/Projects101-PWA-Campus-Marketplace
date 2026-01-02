@@ -24,10 +24,7 @@ if "category_filter" not in st.session_state:
 if "user" not in st.session_state:
     st.session_state.user = None
 
-# Custom CSS for styling and hide warnings
-with open("css/profile.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
+# Custom CSS for styling, bootstrap and hide warnings
 
 components.html(
     """
@@ -37,98 +34,35 @@ components.html(
     height=0
 )
 
-st.markdown("""
-<style>
-    /* Hide Streamlit warnings and errors */
-    .stAlert {
-        display: none !important;
-    }
-    [data-testid="stDecoration"] {
-        display: none !important;
-    }
-    .stException {
-        display: none !important;
-    }
-    
-    /* theme */
-    .main {
-        background-color: #f3f3f3;
-    }
-    .stButton>button {
-        background-color: #FFD814;
-        color: black;
-        border: none;
-        border-radius: 20px;
-        padding: 8px 20px;
-        font-weight: bold;
-        transition: all 0.3s;
-    }
-    .stButton>button:hover {
-        background-color: #F7CA00;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .stSelectbox>div>div {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
-    .stTextInput>div>div>input {
-        border-radius: 8px;
-        border: 1px solid #ddd;
-    }
-    .listing-card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        transition: transform 0.3s;
-    }
-    .listing-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-    .price-tag {
-        background: #FFD814;
-        color: #B12704;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: bold;
-        display: inline-block;
-    }
-    .contact-buttons {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    .whatsapp-btn {
-        background-color: #25D366 !important;
-        color: white !important;
-    }
-    .call-btn {
-        background-color: #007BFF !important;
-        color: white !important;
-    }
-    /* Hide Streamlit menu */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    
-</style>
-""", unsafe_allow_html=True)
+with open("css/app.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+
+with open("css/listings.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+#end of css styling
 
 
 # Hide warnings
 import warnings
-warnings.filterwarnings("ignore")
+#warnings.filterwarnings("ignore")
+
 
 # ----------------------------
 # Page router
 # ----------------------------
 if st.session_state.page == "login":
+    with open("css/auth.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
     login()
 
 if st.session_state.page == "profile":
+    with open("css/profile.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
     profile()
 
 elif st.session_state.page == "home":
@@ -222,8 +156,8 @@ elif st.session_state.page == "home":
     
     with col_main:
         # Page title and filters summary
-        st.markdown("<h1 style='color: #232F3E; margin-bottom: 10px;'>Campus Marketplace</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color: #565959; margin-top: 0;'>Your one-stop shop for campus essentials</p>", unsafe_allow_html=True)
+        st.markdown("<h1 class='app-title'>Campus Marketplace</h1>", unsafe_allow_html=True)
+        st.markdown("<p class='app-subtitle'>Your one-stop shop for campus essentials</p>", unsafe_allow_html=True)
         
         # Active filters display
         filters_active = []
@@ -234,15 +168,16 @@ elif st.session_state.page == "home":
         if st.session_state.category_filter != "All":
             filters_active.append(f"Category: {st.session_state.category_filter}")
         
-        if filters_active:
-            st.markdown(f"**Active filters:** {', '.join(filters_active)}")
-        
         # Create listing button
         if st.button("➕ Create New Listing", use_container_width=True, type="primary"):
             st.session_state.page = "create_listing"
             st.rerun()
         
         st.markdown("---")
+
+        #shifted active filters down here | remove after successful run
+        if filters_active:
+            st.markdown(f"**Active filters:** {', '.join(filters_active)}")
         
         # Display listings
         view_listings(

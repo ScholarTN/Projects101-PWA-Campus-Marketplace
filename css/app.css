@@ -1,0 +1,61 @@
+/* Custom CSS For the Main Page */
+
+/* Hide Streamlit warnings and errors */
+.stAlert {
+    display: none !important;
+}
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+.stException {
+    display: none !important;
+}
+
+/* theme */
+* {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.main {
+    background-color: #f3f3f3;
+}
+
+.app-title{
+    color: #c9dcf4; /*originally: #232F3E */
+    margin-bottom: 6px;
+}
+
+.app-subtitle{
+    color: #565959; 
+    margin-top: 0;
+}
+
+.stButton>button {
+    background-color: #FFD814;
+    color: black;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.stButton>button:hover {
+    background-color: #F7CA00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.stSelectbox>div>div {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+.stTextInput>div>div>input {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+  /* Hide Streamlit menu */
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}

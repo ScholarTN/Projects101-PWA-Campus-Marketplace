@@ -1,0 +1,82 @@
+.stContainer{
+    background: linear-gradient(135deg, #000 0%, #FFD814 100%);
+}
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.login-card {
+    background: transparent;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-title {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    margin-top: 18px;
+    font-size: 28px;
+    font-weight: 600;
+    color: #232F3E;
+}
+
+.login-subtitle {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #666;
+}
+
+.login-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 55px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Floating Input Labels */
+.stTextInput>div>div>input {
+    height: 45px;
+    border-radius: 10px;
+    border: 1.5px solid #ccc;
+    transition: 0.2s ease-in-out;
+}
+
+.stTextInput>div>div>input:focus {
+    border: 2px solid #00c29a;
+    box-shadow: 0 0 10px rgba(0, 194, 154, 0.3);
+}
+
+/* Buttons */
+button[kind="secondary"] {
+    background: #FFD814;
+    color: #333 !important;
+    border-radius: 10px;
+    height: 45px;
+    border: none;
+    transition: 0.3s ease-in-out;
+    font-size: 16px;
+}
+
+button[kind="secondary"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(0, 0, 0, 0.25);
+}
+
+.footer {
+    text-align: center;
+    margin-top: 18px;
+    color: white;
+    font-size: 13px;
+}
+
+@media (max-width: 500px) {
+    .login-card {
+        padding: 35px 25px;
+    }
+}

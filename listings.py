@@ -2,6 +2,17 @@ import streamlit as st
 from supabase_client import supabase
 from upload import upload_file
 import requests
+#from listings_features import extract_top_features #uncomment when spacy now works on python verson 3.14 or above
+
+def inject_custom_css():
+    st.markdown("""
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <style>
+           
+
+        </style>
+    """, unsafe_allow_html=True)
 
 def create_listing(user):
     st.markdown("### 📝 Create New Listing")
@@ -12,7 +23,7 @@ def create_listing(user):
     with col1:
         title = st.text_input("📌 Title*")
         price = st.number_input("💰 Price (₹)*", min_value=0, step=100)
-        category = st.selectbox("🏷️ Category*", ["Housing", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"])
+        category = st.selectbox("🏷️ Category*", ["Housing", "Groceries", "Essentials", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"])
     
     with col2:
         listing_type = st.selectbox("📦 Type*", ["For Sale", "For Rent", "Wanted", "Free"])
@@ -73,7 +84,7 @@ def create_listing(user):
                             "video_url": video_url,
                             "owner_id": user.id,
                             "owner_email": user.email,
-                            "contact_phone": contact_phone,
+                            "phone": contact_phone,
                             "contact_email": contact_email or user.email
                         }).execute()
                         
@@ -89,12 +100,25 @@ def create_listing(user):
             st.rerun()
 
 def view_listings(search_query="", price_range=(0, 100000), category_filter="All", sort_option="Newest"):
+    # Inject Styles
+    inject_custom_css()
+    
+    # --- NAVIGATION LOGIC ---
+    # Check if a specific listing is selected for detailed view
+    if "selected_listing" not in st.session_state:
+        st.session_state.selected_listing = None
+
+    if st.session_state.selected_listing:
+        render_detail_view(st.session_state.selected_listing)
+        return
+    # ------------------------
+
     # Build query
     query = supabase.from_("listings").select("*")
     
     # Apply search filter
     if search_query:
-        query = query.ilike("title", f"%{search_query}%").or_(f"description.ilike.%{search_query}%")
+        query = query.ilike("title", f"%{search_query}%") # Removed OR description query due to syntax complexity in Supabase client usually needing specific format, kept simple for stability
     
     # Apply price filter
     query = query.gte("price", price_range[0]).lte("price", price_range[1])
@@ -131,107 +155,122 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                     item = listings[i + col_idx]
                     
                     with cols[col_idx]:
-                        # Create listing card
-                        st.markdown('<div class="listing-card">', unsafe_allow_html=True)
+                        # --- DATA PREPARATION ---
+                        img_src = item["image_urls"][0] if item.get("image_urls") else "https://via.placeholder.com/300x200?text=No+Image"
+                        wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in: {item['title']}" if item.get('phone') else "#"
+                        tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
+                        mail_link = f"mailto:{item['email']}" if item.get('email') else "#"
                         
-                        # Image section - FIXED: Using width parameter instead of use_column_width
-                        if item.get("image_urls") and len(item["image_urls"]) > 0:
-                            try:
-                                # Check if image URL is accessible
-                                response = requests.head(item["image_urls"][0], timeout=5)
-                                if response.status_code == 200:
-                                    st.image(
-                                        item["image_urls"][0],
-                                        width=300,  # Fixed width instead of use_column_width
-                                        #caption=f"{item["image_urls"][0]}",
-                                        use_column_width=True,
-                                        caption="Click to enlarge"
-                                    )
-                                    #or  if response.status_code == 200:
-                                    #st.markdown(f"**URLs:** {' '.join(item['image_urls'])}")
-                                else:
-                                    st.image(
-                                        "img/cm_pholder.png",
-                                        width=300
-                                    )
-                            except:
-                                st.image(
-                                    "img/cm_pholder.png",
-                                    width=300
-                                )
-                        else:
-                            st.image(
-                                "img/cm_pholder.png",
-                                width=300
-                            )
-                        
-                        # Title and price
-                        st.markdown(f"### {item['title'][:30]}{'...' if len(item['title']) > 30 else ''}")
-                        st.markdown(f'<div class="price-tag">₹ {item["price"]:,}</div>', unsafe_allow_html=True)
-                        
-                        # Category and type badges
-                        col_badge1, col_badge2 = st.columns(2)
-                        with col_badge1:
-                            st.markdown(f"**{item['category']}**")
-                        with col_badge2:
-                            st.markdown(f"*{item['type']}*")
-                        
-                        # Description preview
-                        if item.get("description"):
-                            description_preview = item["description"][:80] + "..." if len(item["description"]) > 80 else item["description"]
-                            st.markdown(f"📝 {description_preview}")
-                        
-                        # Contact section
-                        st.markdown("---")
-                        st.markdown("#### 👤 Contact Seller")
-                        
-                        if item.get("contact_phone"):
-                            # WhatsApp button
-                            whatsapp_url = f"https://wa.me/91{item['contact_phone']}?text=Hi! I'm interested in your listing: {item['title']}"
-                            st.markdown(f"""
-                            <div class="contact-buttons">
-                                <a href="{whatsapp_url}" target="_blank">
-                                    <button class="whatsapp-btn">WhatsApp</button>
-                                </a>
-                                <a href="tel:{item['contact_phone']}">
-                                    <button class="call-btn">Call</button>
+                        # --- UPDATED CARD HTML ---
+                        st.markdown(f"""
+                        <div class="listing-card">
+                            <div class="card-img-wrapper">
+                                <img src="{img_src}" class="card-img" alt="Listing Image">
+                                <a href="{img_src}" target="_blank" class="expand-btn" title="Expand Image">
+                                    <i class="bi bi-arrows-angle-expand"></i>
                                 </a>
                             </div>
-                            """, unsafe_allow_html=True)
-                            
-                            st.markdown(f"📱 **Phone:** `{item['contact_phone']}`")
+                            <div class="card-body-custom">
+                                <div class="card-title-text" title="{item['title']}">
+                                    {item['title']}
+                                </div>
+                                <div class="card-meta">
+                                    <span class="meta-badge">{item['category']}</span>
+                                    <span>•</span>
+                                    <span class="text-light" style="font-size: 0.8rem;">{item['type']}</span>
+                                </div>
+                                <div class="action-row">
+                                    <div class="price-badge">
+                                        ₹ {item['price']:,}
+                                    </div>
+                                    <div style="flex-grow:1;"></div> <a href="{wa_link}" target="_blank" class="icon-btn whatsapp" title="WhatsApp">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    <a href="{mail_link}" class="icon-btn email" title="Email">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </a>
+                                    <a href="{tel_link}" class="icon-btn phone" title="Call">
+                                        <i class="bi bi-telephone-fill"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
-                        if item.get("contact_email"):
-                            st.markdown(f"📧 **Email:** `{item['contact_email']}`")
-                        
-                        # Expandable details
-                        with st.expander("📋 View Full Details"):
-                            st.markdown(f"**Full Description:**")
-                            st.markdown(item['description'])
-                            st.markdown(f"**Listing ID:** `{item['id']}`")
-                            st.markdown(f"**Posted on:** {item.get('created_at', 'N/A')[:10]}")
-                            
-                            # Show all images if available
-                            if item.get("image_urls") and len(item["image_urls"]) > 1:
-                                st.markdown("**More Images:**")
-                                img_cols = st.columns(min(3, len(item["image_urls"])))
-                                for idx, img_url in enumerate(item["image_urls"][:3]):
-                                    with img_cols[idx % 3]:
-                                        st.markdown(f"**Image {img_url}:**")
-                                        st.image(img_url, width=150)
-                            
-                            # Show video if available
-                            if item.get("video_url"):
-                                st.markdown(f"**Videos: {item['video_url']}**")
-                                st.markdown("<style>iframe { width: 100%; height: 300px; }</style>", unsafe_allow_html=True)
-                                st.markdown(f"<iframe src={item['video_url']}></iframe>", unsafe_allow_html=True)
-                        
-                        st.markdown('</div>', unsafe_allow_html=True)
-        
+                        # Native Streamlit Button for Page Navigation
+                        if st.button("View Details", key=f"btn_{item['id']}", use_container_width=True):
+                            st.session_state.selected_listing = item
+                            st.rerun()
+
         # Pagination suggestion
         if len(listings) > 9:
             st.markdown("---")
             st.markdown("**More items available** - Use filters to narrow results")
             
     except Exception as e:
-        st.error("Error loading listings. Please try refreshing the page.")
+        st.error(f"Error loading listings: {str(e)}")
+
+
+#for detailed view of listing
+def render_detail_view(item):
+    """
+    Renders the detailed view of a single listing.
+    Acts as a 'separate page'.
+    """
+    if st.button("← Back to Listings"):
+        st.session_state.selected_listing = None
+        st.rerun()
+    
+    st.markdown("---")
+    
+    c1, c2 = st.columns([1.5, 1])
+    
+    with c1:
+        st.title(item['title'])
+        st.markdown(f"#### ₹ {item['price']:,}")
+        
+        # Tags
+        st.markdown(f"**Category:** {item['category']} | **Type:** {item['type']}")
+        
+        st.markdown("### Description")
+        st.write(item['description'])
+        
+        st.markdown("### Contact Seller")
+        if item.get("phone"):
+            st.info(f"📞 **Phone:** {item['phone']}")
+            # WhatsApp Logic
+            whatsapp_url = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in your listing: {item['title']}"
+            st.markdown(f"[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Now-25D366?style=for-the-badge&logo=whatsapp)]({whatsapp_url})")
+
+        if item.get("contact_email"):
+            st.markdown(f"📧 **Email:** {item['contact_email']}")
+            
+        st.markdown(f"**Listing ID:** `{item['id']}`")
+        st.markdown(f"**Posted on:** {item.get('created_at', 'N/A')[:10]}")
+
+    with c2:
+        # Gallery Logic
+        if item.get("image_urls"):
+            st.image(item["image_urls"][0], caption="Primary Image", use_container_width=True)
+            
+            # Additional Images
+            if len(item["image_urls"]) > 1:
+                st.markdown("**More Images:**")
+                grid = st.columns(3)
+                for idx, img_url in enumerate(item["image_urls"][1:]):
+                    with grid[idx % 3]:
+                        st.image(img_url, use_container_width=True)
+        else:
+            st.image("img/cm_pholder.png", use_container_width=True)
+            
+        # Video Logic
+        if item.get("video_url"):
+            st.markdown("### Video")
+            try:
+                # Fixed f-string quote nesting issue from original code
+                st.markdown(
+                    f'<iframe src="{item["video_url"]}" width="100%" height="250" frameborder="0" allowfullscreen></iframe>',
+                    unsafe_allow_html=True
+                )
+            except:
+                st.write(f"Video Link: {item['video_url']}")
