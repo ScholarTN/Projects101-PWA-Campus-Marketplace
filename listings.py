@@ -2,7 +2,7 @@ import streamlit as st
 from supabase_client import supabase
 from upload import upload_file
 import requests
-#from listings_features import extract_top_features #uncomment when spacy now works on python verson 3.14 or above
+import time
 
 def inject_custom_css():
     st.markdown("""
@@ -15,7 +15,7 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def create_listing(user):
-    st.markdown("###  Create New Listing")
+    st.markdown("### 📝 Create New Listing")
     st.markdown("Fill in the details below to create your listing")
     
     col1, col2 = st.columns(2)
@@ -23,14 +23,17 @@ def create_listing(user):
     with col1:
         title = st.text_input("📌 Title*")
         price = st.number_input("💰 Price (₹)*", min_value=0, step=100)
-        category = st.selectbox("🏷️ Category*", ["Housing", "Groceries", "Essentials", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"])
+        category = st.selectbox("🏷️ Category*", 
+                               ["Housing", "Groceries", "Essentials", "Electronics", 
+                                "Furniture", "Books", "Clothing", "Services", "Other"])
     
     with col2:
-        listing_type = st.selectbox("📦 Type*", ["For Sale", "For Rent", "Wanted", "Free"])
+        listing_type = st.selectbox("📦 Type*", 
+                                   ["For Sale", "For Rent", "Wanted", "Free"])
         contact_phone = st.text_input("📱 Your Phone Number*")
         contact_email = st.text_input("📧 Your Email", value=user.email if user else "")
     
-    description = st.text_area(" Description*", height=150)
+    description = st.text_area("📄 Description*", height=150)
     
     st.markdown("### 🖼️ Media")
     col1, col2 = st.columns(2)
@@ -72,9 +75,9 @@ def create_listing(user):
                         except Exception as e:
                             st.warning(f"Could not upload video")
                     
-                    # Insert into database
+                    # Insert into database - NOW WITH ALL COLUMNS
                     try:
-                        supabase.from_("listings").insert({
+                        listing_data = {
                             "title": title,
                             "description": description,
                             "price": price,
@@ -86,13 +89,48 @@ def create_listing(user):
                             "owner_email": user.email,
                             "phone": contact_phone,
                             "contact_email": contact_email or user.email
-                        }).execute()
+                        }
                         
-                        st.success("✅ Listing created successfully!")
-                        st.balloons()
+                        response = supabase.from_("listings").insert(listing_data).execute()
                         
+                        if response.data:
+                            st.success("✅ Listing created successfully!")
+                            st.balloons()
+                            
+                            # Add success message styling
+                            st.markdown("""
+                            <style>
+                            .success-box {
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                padding: 20px;
+                                border-radius: 10px;
+                                margin: 20px 0;
+                                text-align: center;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            }
+                            .success-box h3 {
+                                color: white;
+                                margin-bottom: 10px;
+                            }
+                            </style>
+                            """, unsafe_allow_html=True)
+                            
+                            st.markdown("""
+                            <div class="success-box">
+                                <h3>🎉 Listing Published!</h3>
+                                <p>Your item is now live on Campus Marketplace.</p>
+                                <p>Redirecting to homepage in 3 seconds...</p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Auto-redirect after 3 seconds
+                            time.sleep(3)
+                            st.session_state.page = "home"
+                            st.rerun()
+                            
                     except Exception as e:
-                        st.error("Failed to create listing. Please try again.")
+                        st.error(f"Failed to create listing: {str(e)}")
     
     with col3:
         if st.button("❌ Cancel", use_container_width=True):
@@ -159,7 +197,9 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                         img_src = item["image_urls"][0] if item.get("image_urls") else "https://via.placeholder.com/300x200?text=No+Image"
                         wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in: {item['title']}" if item.get('phone') else "#"
                         tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
-                        mail_link = f"mailto:{item['email']}" if item.get('email') else "#"
+                        mail_link = f"mailto:{item.get('contact_email') or item.get('owner_email') or ''}"
+                        if not mail_link or mail_link == "mailto:":
+                             mail_link = "#"
                         
                         # --- UPDATED CARD HTML ---
                         st.markdown(f"""
