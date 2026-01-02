@@ -2,7 +2,7 @@ import streamlit as st
 from supabase_client import supabase
 from upload import upload_file
 import requests
-import time
+#from listings_features import extract_top_features #uncomment when spacy now works on python verson 3.14 or above
 
 def inject_custom_css():
     st.markdown("""
@@ -15,7 +15,7 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def create_listing(user):
-    st.markdown("### 📝 Create New Listing")
+    st.markdown("###  Create New Listing")
     st.markdown("Fill in the details below to create your listing")
     
     col1, col2 = st.columns(2)
@@ -23,17 +23,14 @@ def create_listing(user):
     with col1:
         title = st.text_input("📌 Title*")
         price = st.number_input("💰 Price (₹)*", min_value=0, step=100)
-        category = st.selectbox("🏷️ Category*", 
-                               [ "Housing", "Groceries", "Essentials", "Electronics", 
-                                "Furniture", "Books", "Clothing", "Services", "Other"])
+        category = st.selectbox("🏷️ Category*", ["Housing", "Groceries", "Essentials", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"])
     
     with col2:
-        listing_type = st.selectbox("📦 Type*", 
-                                   ["For Sale", "For Rent", "Wanted", "Free"])
+        listing_type = st.selectbox("📦 Type*", ["For Sale", "For Rent", "Wanted", "Free"])
         contact_phone = st.text_input("📱 Your Phone Number*")
         contact_email = st.text_input("📧 Your Email", value=user.email if user else "")
     
-    description = st.text_area("📄 Description*", height=150)
+    description = st.text_area(" Description*", height=150)
     
     st.markdown("### 🖼️ Media")
     col1, col2 = st.columns(2)
@@ -75,9 +72,9 @@ def create_listing(user):
                         except Exception as e:
                             st.warning(f"Could not upload video")
                     
-                    # Insert into database - NOW WITH ALL COLUMNS
+                    # Insert into database
                     try:
-                        listing_data = {
+                        supabase.from_("listings").insert({
                             "title": title,
                             "description": description,
                             "price": price,
@@ -89,48 +86,13 @@ def create_listing(user):
                             "owner_email": user.email,
                             "phone": contact_phone,
                             "contact_email": contact_email or user.email
-                        }
+                        }).execute()
                         
-                        response = supabase.from_("listings").insert(listing_data).execute()
+                        st.success("✅ Listing created successfully!")
+                        st.balloons()
                         
-                        if response.data:
-                            st.success("✅ Listing created successfully!")
-                            st.balloons()
-                            
-                            # Add success message styling
-                            st.markdown("""
-                            <style>
-                            .success-box {
-                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                                color: white;
-                                padding: 20px;
-                                border-radius: 10px;
-                                margin: 20px 0;
-                                text-align: center;
-                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                            }
-                            .success-box h3 {
-                                color: white;
-                                margin-bottom: 10px;
-                            }
-                            </style>
-                            """, unsafe_allow_html=True)
-                            
-                            st.markdown("""
-                            <div class="success-box">
-                                <h3>🎉 Listing Published!</h3>
-                                <p>Your item is now live on Campus Marketplace.</p>
-                                <p>Redirecting to homepage in 3 seconds...</p>
-                            </div>
-                            """, unsafe_allow_html=True)
-                            
-                            # Auto-redirect after 3 seconds
-                            time.sleep(3)
-                            st.session_state.page = "home"
-                            st.rerun()
-                            
                     except Exception as e:
-                        st.error(f"Failed to create listing: {str(e)}")
+                        st.error("Failed to create listing. Please try again.")
     
     with col3:
         if st.button("❌ Cancel", use_container_width=True):
@@ -140,6 +102,21 @@ def create_listing(user):
 def view_listings(search_query="", price_range=(0, 100000), category_filter="All", sort_option="Newest"):
     # Inject Styles
     inject_custom_css()
+
+    # --- 1. HANDLE IMAGE CLICKS (URL PARAMS) ---
+    # This logic detects if an image link was clicked
+    if "view_id" in st.query_params:
+        view_id = st.query_params["view_id"]
+        # Fetch the specific item to set in session state
+        try:
+            response = supabase.from_("listings").select("*").eq("id", view_id).execute()
+            if response.data:
+                st.session_state.selected_listing = response.data[0]
+                # Clear the URL param so we don't get stuck in a loop
+                st.query_params.clear() 
+                st.rerun()
+        except Exception as e:
+            st.error("Could not load selected listing.")
     
     # --- NAVIGATION LOGIC ---
     # Check if a specific listing is selected for detailed view
@@ -197,15 +174,22 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                         img_src = item["image_urls"][0] if item.get("image_urls") else "https://via.placeholder.com/300x200?text=No+Image"
                         wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in: {item['title']}" if item.get('phone') else "#"
                         tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
-                        mail_link = f"mailto:{item.get('contact_email') or item.get('owner_email') or ''}"
-                        if not mail_link or mail_link == "mailto:":
-                             mail_link = "#"
+                        mail_link = f"mailto:{item['email']}" if item.get('email') else "#"
+
+                        # Link for the image click (Self-referencing URL with ID)
+                        detail_link = f"?view_id={item['id']}"
                         
                         # --- UPDATED CARD HTML ---
+                        if st.image(img_src , use_column_width=True, key=f"btn_{item['id']}"):
+                            st.session_state.selected_listing = item
+                            st.rerun()
+
                         st.markdown(f"""
                         <div class="listing-card">
                             <div class="card-img-wrapper">
-                                <img src="{img_src}" class="card-img" alt="Listing Image">
+                                <a href="{detail_link}" target="_self" style="display: block; height: 100%; cursor: pointer;">
+                                    <img src="{img_src}" class="card-img" alt="Listing Image" onl>
+                                </a>
                                 <a href="{img_src}" target="_blank" class="expand-btn" title="Expand Image">
                                     <i class="bi bi-arrows-angle-expand"></i>
                                 </a>
@@ -250,6 +234,9 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
     except Exception as e:
         st.error(f"Error loading listings: {str(e)}")
 
+def Details(item):
+     st.session_state.selected_listing = item
+     st.rerun()
 
 #for detailed view of listing
 def render_detail_view(item):
@@ -276,23 +263,14 @@ def render_detail_view(item):
         st.write(item['description'])
         
         st.markdown("### Contact Seller")
+        if item.get("phone"):
+            st.info(f"📞 **Phone:** {item['phone']}")
+            # WhatsApp Logic
+            whatsapp_url = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in your listing: {item['title']}"
+            st.markdown(f"[![WhatsApp](https://img.shields.io/badge/WhatsApp-Chat_Now-25D366?style=for-the-badge&logo=whatsapp)]({whatsapp_url})")
 
-        wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in your listing: {item['title']}"
-        tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
-        mail_link = f"mailto:{item.get('contact_email') or item.get('owner_email') or ''}"
-
-        st.markdown(f"""<div style="display:inline-flex"> 
-                    <a href="{wa_link}" target="_blank" class="icon-btn whatsapp-active m-1" title="WhatsApp">
-                        <i class="bi bi-whatsapp"></i>
-                    </a>
-                    <a href="{mail_link}" class="icon-btn email-active m-1" title="Email">
-                        <i class="bi bi-envelope-fill"></i>
-                    </a>
-                    <a href="{tel_link}" class="icon-btn phone-active m-1" title="Call">
-                        <i class="bi bi-telephone-fill"></i>
-                    </a> </div>""", unsafe_allow_html=True)
-        
-        st.markdown("<br/>", unsafe_allow_html=True)
+        if item.get("contact_email"):
+            st.markdown(f"📧 **Email:** {item['contact_email']}")
             
         st.markdown(f"**Listing ID:** `{item['id']}`")
         st.markdown(f"**Posted on:** {item.get('created_at', 'N/A')[:10]}")

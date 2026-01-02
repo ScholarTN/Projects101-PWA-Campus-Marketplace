@@ -14,3 +14,4 @@ def upload_file(file, folder):
     public_url = supabase.storage.from_("media").get_public_url(file_name)
 
     return public_url
+#We need a try except block to handle exceptions

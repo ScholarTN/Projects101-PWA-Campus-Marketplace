@@ -154,6 +154,10 @@ div[data-testid="stColumn"] { padding: 0 5px; }
 .icon-btn.email:hover { background: #EA4335; color: white; border-color: #EA4335; }
 .icon-btn.phone:hover { background: #3498DB; color: white; border-color: #3498DB; }
 
+.icon-btn.whatsapp-active { background: #25D366; color: white; border-color: #25D366; }
+.icon-btn.email-active { background: #EA4335; color: white; border-color: #EA4335; }
+.icon-btn.phone-active { background: #3498DB; color: white; border-color: #3498DB; }
+
 /* Streamlit Button Override Hack */
 div.stButton > button {
     width: 100%;

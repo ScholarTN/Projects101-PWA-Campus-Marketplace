@@ -1,6 +1,6 @@
 import streamlit as st
 from auth import login
-from profile import profile
+from profile import profile_page
 from listings import create_listing, view_listings
 import streamlit.components.v1 as components
 
@@ -38,10 +38,6 @@ with open("css/app.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-
-with open("css/listings.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
 #end of css styling
 
 
@@ -60,12 +56,15 @@ if st.session_state.page == "login":
     login()
 
 if st.session_state.page == "profile":
-    with open("css/profile.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    # with open("css/profile.css") as f: #now handled in profile.py
+    #     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    profile()
+    profile_page(st.session_state.user) #st.session_state.user
 
 elif st.session_state.page == "home":
+    with open("css/listings.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
     # Only show minimal header with search and logout
     col1, col2, col3 = st.columns([2, 4, 2])
     
@@ -94,14 +93,16 @@ elif st.session_state.page == "home":
                 st.rerun()
         with col3b:
             if st.button(" Logout", use_container_width=True):
-                st.session_state.page = "login"
-                st.session_state.user = None
+                # st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
+                # st.session_state.user = None
+                supabase.auth.sign_out()
+                st.session_state.clear()
                 st.rerun()
     
     st.markdown("---")
     
     # Main layout with sidebar filters
-    col_sidebar, col_main = st.columns([2, 4])
+    col_sidebar, col_main = st.columns([1, 4])
     
     with col_sidebar:
         st.markdown("###  Filters")
@@ -109,29 +110,41 @@ elif st.session_state.page == "home":
         
         # Price range filter
         st.markdown("**Price Range (₹)**")
+        if "price_range" not in st.session_state:
+            st.session_state.price_range = (0, 100000)  # default value
+
+        min_price, max_price = st.session_state.price_range
+
         min_price, max_price = st.slider(
             "Select price range",
             min_value=0,
             max_value=100000,
-            value=st.session_state.price_range,
+            value=(min_price, max_price),
             step=100,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="price_range"
         )
-        st.session_state.price_range = (min_price, max_price)
+        #st.session_state.price_range = (min_price, max_price)
         st.markdown(f"*₹{min_price} - ₹{max_price}*")
         
         st.markdown("---")
         
         # Category filter
         st.markdown("**Category**")
-        categories = ["All", "Housing", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"]
+        categories = ["All", "Housing", "Groceries", "Essentials", "Electronics", "Furniture", "Books", "Clothing", "Services", "Other"]
+        
+        if "category_filter" not in st.session_state:
+            st.session_state.category_filter = "All"  # default value
+
         selected_category = st.selectbox(
             "Select category",
             categories,
             index=categories.index(st.session_state.category_filter) if st.session_state.category_filter in categories else 0,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="category_filter"
         )
-        st.session_state.category_filter = selected_category
+        ## No need to reassign — Streamlit already updates st.session_state["category_filter"]
+        #st.session_state.category_filter = selected_category
         
         st.markdown("---")
         

@@ -5,18 +5,18 @@ from supabase_client import supabase
 
 def login():
     # Wrap everything in a Streamlit container
-    with st.container():
-        st.markdown('<div class="login-wrapper"><div class="login-card">', unsafe_allow_html=True)
+    with st.container(key="login-container"):
+        st.write('<div class="login-wrapper"><div class="login-card">', unsafe_allow_html=True)
 
         # Logo and title
-        st.markdown("<h1 style='text-align: center;'>🛒</h1>", unsafe_allow_html=True)
-        st.markdown("<h2 class='login-title'>Campus Marketplace</h2>", unsafe_allow_html=True)
-        st.markdown("<p class='login-subtitle'>Login to buy and sell on campus</p>", unsafe_allow_html=True)
+        st.write("<h1 style='text-align: center;'>🛒</h1>", unsafe_allow_html=True)
+        st.write("<h2 class='login-title'>Campus Marketplace</h2>", unsafe_allow_html=True)
+        st.write("<p class='login-subtitle'>Login to buy and sell on campus</p>", unsafe_allow_html=True)
 
         st.divider()
 
         # Login form
-        email = st.text_input("📧 Email Address")
+        email = st.text_input("📧 Email Address", key="user_l_email")
         password = st.text_input("🔑 Password", type="password")
 
         # Buttons in columns
