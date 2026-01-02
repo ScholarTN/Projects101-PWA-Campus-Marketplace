@@ -23,7 +23,7 @@ def login():
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("🚪 Login", use_container_width=True):
+            if st.button(" Login", use_container_width=True):
                 if email and password:
                     try:
                         res = supabase.auth.sign_in_with_password({
@@ -40,7 +40,7 @@ def login():
                     st.warning("Please enter both email and password")
 
         with col2:
-            if st.button("📝 Sign Up", use_container_width=True):
+            if st.button(" Sign Up", use_container_width=True):
                 if email and password:
                     try:
                         supabase.auth.sign_up({

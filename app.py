@@ -71,11 +71,11 @@ elif st.session_state.page == "home":
     
     with col1:
         # Empty space or minimal logo
-        st.markdown("### 🛒")
+        st.markdown("### ")
     
     with col2:
         search_query = st.text_input(
-            "🔍 Search items, categories, etc...",
+            " Search items, categories, etc...",
             value=st.session_state.search_query,
             key="search_input",
             label_visibility="collapsed",
@@ -93,7 +93,7 @@ elif st.session_state.page == "home":
                 st.session_state.page = "profile"
                 st.rerun()
         with col3b:
-            if st.button("🚪 Logout", use_container_width=True):
+            if st.button(" Logout", use_container_width=True):
                 st.session_state.page = "login"
                 st.session_state.user = None
                 st.rerun()
@@ -104,7 +104,7 @@ elif st.session_state.page == "home":
     col_sidebar, col_main = st.columns([2, 4])
     
     with col_sidebar:
-        st.markdown("### 🔍 Filters")
+        st.markdown("###  Filters")
         st.markdown("---")
         
         # Price range filter
@@ -147,7 +147,7 @@ elif st.session_state.page == "home":
         st.markdown("---")
         
         # Clear filters button
-        if st.button("🧹 Clear Filters", use_container_width=True):
+        if st.button(" Clear Filters", use_container_width=True):
             st.session_state.search_query = ""
             st.session_state.price_range = (0, 100000)
             st.session_state.category_filter = "All"

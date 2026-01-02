@@ -15,7 +15,7 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def create_listing(user):
-    st.markdown("### 📝 Create New Listing")
+    st.markdown("###  Create New Listing")
     st.markdown("Fill in the details below to create your listing")
     
     col1, col2 = st.columns(2)
@@ -30,7 +30,7 @@ def create_listing(user):
         contact_phone = st.text_input("📱 Your Phone Number*")
         contact_email = st.text_input("📧 Your Email", value=user.email if user else "")
     
-    description = st.text_area("📄 Description*", height=150)
+    description = st.text_area(" Description*", height=150)
     
     st.markdown("### 🖼️ Media")
     col1, col2 = st.columns(2)
@@ -265,12 +265,10 @@ def render_detail_view(item):
             
         # Video Logic
         if item.get("video_url"):
-            st.markdown("### Video")
+            st.markdown("### Video Preview")
             try:
-                # Fixed f-string quote nesting issue from original code
-                st.markdown(
-                    f'<iframe src="{item["video_url"]}" width="100%" height="250" frameborder="0" allowfullscreen></iframe>',
-                    unsafe_allow_html=True
-                )
-            except:
-                st.write(f"Video Link: {item['video_url']}")
+                st.video(item["video_url"], format="video/mp4")
+            except Exception as e:
+                # Fallback to a link if video doesn't play
+                st.warning("Video cannot be played directly. You can download it using the link below:")
+                st.markdown(f"**Video Link:** [{item['video_url']}]({item['video_url']})")
