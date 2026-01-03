@@ -1,33 +1,10 @@
 import streamlit as st
 from supabase_client import supabase
-from cookies_manager import CookiesManager
 
 def inject_login_css():
     #moved to auth.css
     pass
 
-def checkCookies():
-    """Checks for existing session in browser cookies"""
-    cookie_data = CookiesManager.get_session_cookie()
-    
-    if cookie_data:
-        try:
-            # Restore Supabase session
-            response = supabase.auth.set_session(
-                cookie_data['access_token'], 
-                cookie_data['refresh_token']
-            )
-            if response.user:
-                st.session_state.user = response.user
-                st.session_state.page = "home"
-                st.rerun()
-            else:
-                CookiesManager.clear_session_cookie()
-        except Exception:
-            CookiesManager.clear_session_cookie()
-            
-    # If no valid cookie, stay on login
-    return
 
 def login():
     inject_login_css()
@@ -65,14 +42,6 @@ def login():
                         })
                         
                         if res.user and res.session:
-                            # SAVE COOKIES (Vital for persistence)
-                            CookiesManager.set_session_cookie(
-                                user_id=res.user.id,
-                                email=res.user.email,
-                                access_token=res.session.access_token,
-                                refresh_token=res.session.refresh_token
-                            )
-
                             st.session_state.user = res.user
                             st.session_state.page = "home"
                             st.rerun()

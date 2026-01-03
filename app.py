@@ -4,7 +4,6 @@ from profile import profile_page
 from auth_registration import register_user_profile as signup
 from profile_email_reset import reset_password
 from listings import create_listing, view_listings
-import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Campus Marketplace",
