@@ -1,0 +1,52 @@
+import string
+import random
+
+og_email = "none"
+og_email =CookiesManager.get_access_token()
+og_password = ""
+
+def checkCookies():
+    # 1. Get cookie data from browser
+    cookie_data = CookiesManager.get_session_cookie()
+
+    
+    
+    if cookie_data:
+        try:
+            user_id = cookie_data.get('user_id')
+            # 2. VITAL: Restore the Supabase session using the tokens
+            # This ensures the supabase client knows who is logged in
+            response = supabase.auth.get_user(
+                user_id = user_id
+            )
+            
+            if response.user:
+                st.session_state.user = response.user
+                st.session_state.page = "home"
+                st.success(f"Welcome back, {response.user.email}!")
+                st.rerun()
+            else:
+                # Token might be expired
+                CookiesManager.clear_session_cookie()
+                login()
+        except Exception as e:
+            # If session restoration fails, clear cookies and login
+            CookiesManager.clear_session_cookie()
+            login()
+    else:
+        login()
+
+
+#on login success:
+# SAVE TO BROWSER COOKIES
+CookiesManager.set_session_cookie(
+    user_id=res.user.id,
+    email=res.user.email,
+    access_token=generate_random_string(),
+    refresh_token=generate_random_string()
+)
+
+
+def generate_random_string(length = 5):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for _ in range(length))

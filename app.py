@@ -1,6 +1,7 @@
 import streamlit as st
 from auth import login
 from profile import profile_page
+from auth_registration import register_user_profile as signup
 from listings import create_listing, view_listings
 import streamlit.components.v1 as components
 
@@ -54,6 +55,12 @@ if st.session_state.page == "login":
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     login()
+
+if st.session_state.page == "signup":
+    with open("css/auth_registration.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+    signup()
 
 if st.session_state.page == "profile":
     # with open("css/profile.css") as f: #now handled in profile.py

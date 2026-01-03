@@ -1,97 +1,60 @@
-#module code to create and validate session cookies. Too bad i used a class
-
 import streamlit as st
+import extra_streamlit_components as stx
 from datetime import datetime, timedelta
 import json
 
 class CookiesManager:
-    """Manages user session cookies for login persistence."""
-    
     COOKIE_NAME = "campus_marketplace_session"
-    COOKIE_EXPIRY_DAYS = 7
-    
+
     @staticmethod
-    def set_session_cookie(user_id: str, email: str, access_token: str, refresh_token: str = None):
+    def get_manager():
         """
-        Store user session data in Streamlit session state (simulating cookies).
+        Initialize the cookie manager. 
+        IMPORTANT: This must be called at the start of the app layout.
+        """
+        # This creates a singleton instance in session state to avoid re-initializing
+        if 'cookie_manager' not in st.session_state:
+            st.session_state.cookie_manager = stx.CookieManager()
+        return st.session_state.cookie_manager
+
+    @staticmethod
+    def set_session_cookie(user_id: str, email: str, access_token: str, refresh_token: str):
+        manager = CookiesManager.get_manager()
         
-        Args:
-            user_id: User's unique identifier
-            email: User's email
-            access_token: JWT access token from Supabase
-            refresh_token: Optional refresh token
-        """
-        cookie_data = {
+        cookie_payload = {
             "user_id": user_id,
             "email": email,
             "access_token": access_token,
-            "refresh_token": refresh_token,
-            "created_at": datetime.now().isoformat(),
-            "expires_at": (datetime.now() + timedelta(days=CookiesManager.COOKIE_EXPIRY_DAYS)).isoformat()
+            "refresh_token": refresh_token
         }
         
-        st.session_state[CookiesManager.COOKIE_NAME] = cookie_data
-    
+        # Save to browser (expires in 7 days)
+        # Note: We verify persistence by saving it as a stringified JSON
+        manager.set(
+            CookiesManager.COOKIE_NAME, 
+            json.dumps(cookie_payload), 
+            expires_at=datetime.now() + timedelta(days=7)
+        )
+
     @staticmethod
-    def get_session_cookie() -> dict or None:
-        """
-        Retrieve user session data from cookies.
+    def get_session_cookie():
+        manager = CookiesManager.get_manager()
+        # This gets the actual browser cookie
+        cookie_val = manager.get(CookiesManager.COOKIE_NAME)
         
-        Returns:
-            Dictionary with session data if valid, None otherwise
-        """
-        if CookiesManager.COOKIE_NAME not in st.session_state:
-            return None
-        
-        cookie_data = st.session_state[CookiesManager.COOKIE_NAME]
-        
-        # Check if cookie has expired
-        expires_at = datetime.fromisoformat(cookie_data.get("expires_at"))
-        if datetime.now() > expires_at:
-            CookiesManager.clear_session_cookie()
-            return None
-        
-        return cookie_data
-    
+        if cookie_val:
+            try:
+                return json.loads(cookie_val)
+            except:
+                return None
+        return None
+
     @staticmethod
     def clear_session_cookie():
-        """Clear user session cookies (logout)."""
-        if CookiesManager.COOKIE_NAME in st.session_state:
-            del st.session_state[CookiesManager.COOKIE_NAME]
-    
-    @staticmethod
-    def is_user_logged_in() -> bool:
-        """Check if user has a valid session cookie."""
-        return CookiesManager.get_session_cookie() is not None
-    
-    @staticmethod
-    def get_user_email() -> str or None:
-        """Get email from session cookie."""
-        cookie_data = CookiesManager.get_session_cookie()
-        return cookie_data.get("email") if cookie_data else None
-    
-    @staticmethod
-    def get_access_token() -> str or None:
-        """Get access token from session cookie."""
-        cookie_data = CookiesManager.get_session_cookie()
-        return cookie_data.get("access_token") if cookie_data else None
-
-
-    #code for checking if session is valid
-    @staticmethod
-    def is_session_valid(session_token: str, email: str) -> bool:
-        """
-        Validate session token and email against session cookie data.
+        manager = CookiesManager.get_manager()
+        manager.delete(CookiesManager.COOKIE_NAME)
         
-        Args:
-            session_token: JWT access token from Supabase
-            email: User's email
-        
-        Returns:
-            True if session token and email match session cookie data, False otherwise
-        """
-        cookie_data = CookiesManager.get_session_cookie()
-        if not cookie_data:
-            return False
-        
-        return cookie_data.get("access_token") == session_token and cookie_data.get("email") == email
+    @staticmethod
+    def get_access_token():
+        data = CookiesManager.get_session_cookie()
+        return data.get('user_id') if data else "None - noid"

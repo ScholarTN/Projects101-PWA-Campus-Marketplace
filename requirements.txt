@@ -17,3 +17,6 @@ Pillow==10.3.0
 #Very important these ones
 #pip install spacy
 #python -m spacy download en_core_web_sm
+
+##for streamlite cookies:
+#pip install extra-streamlit-components
