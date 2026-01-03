@@ -100,10 +100,10 @@ elif st.session_state.page == "home":
                 st.rerun()
         with col3b:
             if st.button(" Logout", use_container_width=True):
-                # st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
-                # st.session_state.user = None
-                supabase.auth.sign_out()
-                st.session_state.clear()
+                st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
+                st.session_state.user = None
+                # supabase.auth.sign_out()
+                # st.session_state.clear()
                 st.rerun()
     
     st.markdown("---")

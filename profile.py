@@ -1,6 +1,7 @@
 import streamlit as st
 from supabase_client import supabase
 import profile_dashboard  # will create this next
+import error_404 as errorPage
 import time
 
 def inject_profile_css():
@@ -25,6 +26,22 @@ def get_user_stats(user_id):
     except Exception:
         return 0
 
+def get_user_details(email):
+    """Fetch basic stats for the user"""
+    try:
+        # Get count of user's listings
+        response = supabase.from_("logged_users") \
+            .select("id,name,email,phone,role,created_at") \
+            .eq("email", email) \
+            .execute()
+        
+        user_details = response.data[0] if response.data else errorPage.error_404()
+        
+        return user_details
+    except Exception:
+        print(f"Error fetching user details: {e}")
+        return None
+
 def profile_page(user):  #param: user
     """
     Main Profile Entry Point
@@ -42,36 +59,40 @@ def profile_page(user):  #param: user
     # For this demo, I'll simulate the table fetch or use metadata.
     
     # Mocking 'users' table fetch for display (Replace with actual fetch if 'users' table exists)
-    user_details = {
-        "full_name": "No Username", #user.user_metadata.get("full_name", "Campus User"),
-        "role": "Student", # Or fetch from DB
-        "email": user.email,
-        "email_verified": "Not Set",
-        "phone": user.phone, #user.user_metadata.get("phone", "Not Set"),
-        "joined":"Not Set",
-        "avatar":  "img/cm_pholder.png" #user.user_metadata.get("avatar_url", "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.email)
-    }
+    # user_details = {
+    #     "full_name": "No Username", #user.user_metadata.get("full_name", "Campus User"),
+    #     "role": "Student", # Or fetch from DB
+    #     "email": user.email,
+    #     "email_verified": "Not Set",
+    #     "phone": user.phone, #user.user_metadata.get("phone", "Not Set"),
+    #     "joined":"Not Set",
+    #     "avatar":  "img/cm_pholder.png" #user.user_metadata.get("avatar_url", "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.email)
+    # }
     
     listing_count = get_user_stats(user.id)
+    user_details = get_user_details(user.email)
 
     # --- Profile Header Section ---
     st.markdown(f"""
     <div class="profile-header">
         <div class="row align-items-center">
             <div class="col-md-2 text-center">
-                <img src="img/cm_pholder.png" class="profile-avatar" alt="Profile">
+                <div class="avatar-icon">
+                    <i class="bi bi-person-circle" style="font-size: 64px;"></i>
+                    <!-- <img src="img/cm_pholder.png" class="profile-avatar" alt="Profile">-->
+                </div>
             </div>
             <div class="col-md-7">
                 <h2 style="margin-bottom: 5px;">
-                    {user_details['full_name']} 
+                    {user_details['name']} 
                     <i class="bi bi-patch-check-fill verified-badge" title="Verified User"></i>
                 </h2>
                 <div class="mb-2">
-                    <span class="role-badge">{user_details['role']}</span>
+                    <span class="role-badge">{user_details['phone']}</span>
                 </div>
                 <div class="text-muted small">
                     <i class="bi bi-envelope me-2"></i> {user_details['email']} &nbsp;|&nbsp; 
-                    <i class="bi bi-calendar3 me-2"></i> Joined {user_details['joined']}
+                    <i class="bi bi-calendar3 me-2"></i> Registered {user_details['created_at'][:10]}
                 </div>
             </div>
             <div class="col-md-3">
@@ -131,6 +152,6 @@ def profile_page(user):  #param: user
         st.subheader("Security Settings")
         st.info("Password change and 2FA settings would go here.")
         if st.button("Log Out", type="secondary"):
-            supabase.auth.sign_out()
-            st.session_state.clear()
+            st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
+            st.session_state.user = None
             st.rerun()
