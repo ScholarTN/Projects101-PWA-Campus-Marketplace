@@ -87,10 +87,16 @@ def login():
                 ━━━━━━━━━ OR ━━━━━━━━━
             </div>
         """, unsafe_allow_html=True)
-        
-        if st.button("Create New Account", use_container_width=True):
-            st.session_state.page = "signup" # Redirects to the registration logic
-            st.rerun()
+        col1,col2 = st.columns(2)
+        with col1:
+            if st.button("Create New Account", use_container_width=True): #
+                st.session_state.page = "signup" # Redirects to the registration logic
+                st.rerun()
+            
+        with col2:
+            if st.button("Forgot Password ❓", use_container_width=True): #
+                st.session_state.page = "reset_password" # Redirects to the registration logic
+                st.rerun()
             
         st.markdown('</div>', unsafe_allow_html=True)
         # --- CARD END ---

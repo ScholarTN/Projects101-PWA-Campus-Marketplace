@@ -3,6 +3,7 @@ from supabase_client import supabase
 import profile_dashboard  # will create this next
 import error_404 as errorPage
 import time
+import profile_edit
 
 def inject_profile_css():
     st.markdown("""
@@ -95,63 +96,80 @@ def profile_page(user):  #param: user
                     <i class="bi bi-calendar3 me-2"></i> Registered {user_details['created_at'][:10]}
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="d-grid gap-2">
-                     <button class="btn btn-outline-primary btn-sm">Edit Profile</button>
-                     <button class="btn btn-outline-secondary btn-sm">Account Settings</button>
-                </div>
-            </div>
         </div>
-    </div>
+   
     """, unsafe_allow_html=True)
+
+    # --- Action Buttons ---
+    with st.container():
+        col1, col2, col3 = st.columns([2,2,2])
+        with col1:
+            # Toggle edit mode
+            if st.button("✒️ Edit Profile", type="secondary", use_container_width=True):
+                st.session_state.edit_mode = True
+                st.rerun()
+        with col2:
+            st.button("⚙️ Settings", type="secondary", use_container_width=True)
+        with col3:
+            if st.button("⬅️ Back", type="primary", use_container_width=True):
+                st.session_state.page = "home"
+                st.rerun()
+
 
     #st.write(f"User Details: {user}")
 
-    # --- Stats Row ---
-    c1, c2, c3, c4 = st.columns(4)
-    with c1:
-        st.markdown(f"""
-        <div class="stat-card">
-            <div class="stat-value">{listing_count}</div>
-            <div class="stat-label">Active Listings</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-value">4.8</div>
-            <div class="stat-label">Seller Rating</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c3:
-        st.markdown("""
-        <div class="stat-card">
-            <div class="stat-value">12</div>
-            <div class="stat-label">Items Sold</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c4:
-         st.markdown("""
-        <div class="stat-card">
-            <div class="stat-value">85%</div>
-            <div class="stat-label">Response Rate</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    # --- Tabs Navigation ---
-    tab1, tab2 = st.tabs(["🛍️ My Listings", "⚙️ Account Security"])
-
-    with tab1:
-        # Load the dashboard logic for listings
-        profile_dashboard.render_my_listings(user)
-        pass
-    
-    with tab2:
-        st.subheader("Security Settings")
-        st.info("Password change and 2FA settings would go here.")
-        if st.button("Log Out", type="secondary"):
-            st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
-            st.session_state.user = None
+    if st.session_state.get('edit_mode', False):
+        if st.button("← Back to Dashboard"):
+            st.session_state.edit_mode = False
             st.rerun()
+        profile_edit.render_edit_profile(user)
+    else:
+
+        # --- Stats Row ---
+        c1, c2, c3, c4 = st.columns(4)
+        with c1:
+            st.markdown(f"""
+            <div class="stat-card">
+                <div class="stat-value">{listing_count}</div>
+                <div class="stat-label">Active Listings</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with c2:
+            st.markdown("""
+            <div class="stat-card">
+                <div class="stat-value">4.8</div>
+                <div class="stat-label">Seller Rating</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with c3:
+            st.markdown("""
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Items Sold</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with c4:
+            st.markdown("""
+            <div class="stat-card">
+                <div class="stat-value">85%</div>
+                <div class="stat-label">Response Rate</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        # --- Tabs Navigation ---
+        tab1, tab2 = st.tabs(["🛍️ My Listings", "⚙️ Account Security"])
+
+        with tab1:
+            # Load the dashboard logic for listings
+            profile_dashboard.render_my_listings(user)
+            pass
+        
+        with tab2:
+            st.subheader("Security Settings")
+            st.info("Password change and 2FA settings would go here.")
+            if st.button("Log Out", type="secondary"):
+                st.session_state.page = "login" #previosuly just these two lines plus the st.rerun()
+                st.session_state.user = None
+                st.rerun()
