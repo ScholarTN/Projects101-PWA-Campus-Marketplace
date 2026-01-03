@@ -47,8 +47,16 @@ class RatingManager:
                 "listing_rating": rating_value,
                 "listing_owner_id": owner_id
             }
-            # The on_conflict parameter uses the Unique Constraint we created in SQL
-            supabase.table("listing_ratings").upsert(data, on_conflict="user_id, listing_id").execute()
+
+            # The on_conflict parameter should be passed as a list of column names
+            response = supabase.table("listing_ratings").upsert(
+                data,
+                on_conflict=["user_id", "listing_id"]
+            ).execute()
+
+            st.write("Payload:", data)
+            st.write("Response:", response)
+
             return True
         except Exception as e:
             st.error(f"Rating failed: {str(e)}")
