@@ -3,7 +3,8 @@ from auth import login
 from profile import profile_page
 from auth_registration import register_user_profile as signup
 from profile_email_reset import reset_password
-from listings import create_listing, view_listings
+from listing_ratings import create_listing, view_listings
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="Campus Marketplace",
@@ -75,7 +76,7 @@ if st.session_state.page == "profile":
     profile_page(st.session_state.user) #st.session_state.user
 
 elif st.session_state.page == "home":
-    with open("css/listings.css") as f:
+    with open("css/listing_ratings.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     # Only show minimal header with search and logout

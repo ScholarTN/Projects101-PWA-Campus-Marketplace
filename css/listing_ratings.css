@@ -1,0 +1,161 @@
+.listing-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-img-wrapper {
+    position: relative;
+    height: 200px;
+    background-color: #f8f9fa;
+    overflow: hidden;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.expand-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 8px;
+    border-radius: 50%;
+    color: #333;
+    text-decoration: none;
+}
+
+.card-body-custom {
+    padding: 15px;
+}
+
+.card-title-text {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.meta-badge {
+    background: #e9ecef;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #495057;
+}
+
+.action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.price-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+
+/* Action Row */
+.action-row {
+    margin-top: auto; /* Pushes to bottom */
+    padding-top: 12px;
+    border-top: 1px solid #333;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* .icon-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+    text-decoration: none;
+    background: #2b2b2b;
+    border: 1px solid #444;
+    color: #888;
+} */
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+a.icon-btn {
+    color: white;
+}
+
+.icon-btn:hover {
+    opacity: 0.8;
+    color: white;
+}
+
+.whatsapp {
+    background-color: #25D366;
+}
+
+.email {
+    background-color: #EA4335;
+}
+
+.phone {
+    background-color: #0d6efd;
+}
+
+/* Rating Styles */
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.star-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+}
+
+.star-filled {
+    color: #ffc107;
+}
+
+.star-empty {
+    color: #e4e5e9;
+}

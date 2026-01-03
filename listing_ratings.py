@@ -44,8 +44,8 @@ class RatingManager:
             data = {
                 "user_id": user_id,
                 "listing_id": listing_id,
-                "listing_owner_id": owner_id,
-                "listing_rating": rating_value
+                "listing_rating": rating_value,
+                "listing_owner_id": owner_id
             }
             # The on_conflict parameter uses the Unique Constraint we created in SQL
             supabase.table("listing_ratings").upsert(data, on_conflict="user_id, listing_id").execute()
@@ -59,107 +59,7 @@ def inject_custom_css():
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
         <style>
-            .listing-card {
-                background: white;
-                border: 1px solid #eee;
-                border-radius: 12px;
-                overflow: hidden;
-                margin-bottom: 20px;
-                transition: transform 0.2s, box-shadow 0.2s;
-            }
-            .listing-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            }
-            .card-img-wrapper {
-                position: relative;
-                height: 200px;
-                background-color: #f8f9fa;
-                overflow: hidden;
-            }
-            .card-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-            .expand-btn {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(255,255,255,0.9);
-                padding: 5px 8px;
-                border-radius: 50%;
-                color: #333;
-                text-decoration: none;
-            }
-            .card-body-custom {
-                padding: 15px;
-            }
-            .card-title-text {
-                font-weight: 600;
-                font-size: 1.05rem;
-                margin-bottom: 5px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .card-meta {
-                font-size: 0.8rem;
-                color: #6c757d;
-                margin-bottom: 10px;
-            }
-            .meta-badge {
-                background: #e9ecef;
-                padding: 2px 8px;
-                border-radius: 10px;
-                color: #495057;
-            }
-            .action-row {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-top: 10px;
-            }
-            .price-badge {
-                background: #e8f5e9;
-                color: #2e7d32;
-                font-weight: 700;
-                padding: 5px 12px;
-                border-radius: 20px;
-            }
-            .icon-btn {
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 50%;
-                color: white;
-                text-decoration: none;
-                transition: opacity 0.2s;
-            }
-            .icon-btn:hover { opacity: 0.8; color: white; }
-            .whatsapp { background-color: #25D366; }
-            .email { background-color: #EA4335; }
-            .phone { background-color: #0d6efd; }
             
-            /* Rating Styles */
-            .rating-container {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                margin-bottom: 10px;
-            }
-            .star-btn {
-                background: none;
-                border: none;
-                font-size: 1.5rem;
-                cursor: pointer;
-                transition: color 0.2s;
-                padding: 0;
-            }
-            .star-filled { color: #ffc107; }
-            .star-empty { color: #e4e5e9; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -243,7 +143,7 @@ def create_listing(user):
 
 def render_star_rating(item):
     """Renders the interactive star rating component"""
-    user = st.session_state.get("user")
+    user = st.session_state.user
     
     # 1. Get Stats
     avg_rating, total_ratings = RatingManager.get_listing_stats(item['id'])
@@ -251,7 +151,7 @@ def render_star_rating(item):
     # 2. Display Average
     st.markdown(f"#### ⭐ {avg_rating} / 5.0")
     st.caption(f"({total_ratings} ratings)")
-    
+
     if not user:
         st.info("Log in to rate this item")
         return
@@ -260,7 +160,7 @@ def render_star_rating(item):
     if user.id == item['owner_id']:
         st.info("You cannot rate your own listing.")
         return
-
+    
     # 4. Get Current User's Rating
     current_user_rating = RatingManager.get_user_rating(item['id'], user.id)
     
@@ -378,7 +278,12 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                 if i + col_idx < len(listings):
                     item = listings[i + col_idx]
                     with cols[col_idx]:
-                        img = item["image_urls"][0] if item.get("image_urls") else "https://via.placeholder.com/300x200"
+                        img = item["image_urls"][0] if item.get("image_urls") else "img/cm_pholder.png"
+                        wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in: {item['title']}" if item.get('phone') else "#"
+                        tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
+                        mail_link = f"mailto:{item.get('contact_email') or item.get('owner_email') or ''}"
+                        if not mail_link or mail_link == "mailto:":
+                             mail_link = "#"
                         
                         st.markdown(f"""
                         <div class="listing-card">
@@ -388,7 +293,20 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                             <div class="card-body-custom">
                                 <div class="card-title-text">{item['title']}</div>
                                 <div class="card-meta">{item['category']} • {item['type']}</div>
-                                <div class="price-badge">₹ {item['price']:,}</div>
+                                <div class="action-row">
+                                    <div class="price-badge">
+                                        ₹ {item['price']:,}
+                                    </div>
+                                    <div style="flex-grow:1;"></div> <a href="{wa_link}" target="_blank" class="icon-btn whatsapp" title="WhatsApp">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    <a href="{mail_link}" class="icon-btn email" title="Email">
+                                        <i class="bi bi-envelope-fill"></i>
+                                    </a>
+                                    <a href="{tel_link}" class="icon-btn phone" title="Call">
+                                        <i class="bi bi-telephone-fill"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         """, unsafe_allow_html=True)

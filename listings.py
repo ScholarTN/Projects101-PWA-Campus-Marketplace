@@ -194,7 +194,7 @@ def view_listings(search_query="", price_range=(0, 100000), category_filter="All
                     
                     with cols[col_idx]:
                         # --- DATA PREPARATION ---
-                        img_src = item["image_urls"][0] if item.get("image_urls") else "https://via.placeholder.com/300x200?text=No+Image"
+                        img_src = item["image_urls"][0] if item.get("image_urls") else "img/cm_pholder.png"
                         wa_link = f"https://wa.me/91{item['phone']}?text=Hi! I'm interested in: {item['title']}" if item.get('phone') else "#"
                         tel_link = f"tel:{item['phone']}" if item.get('phone') else "#"
                         mail_link = f"mailto:{item.get('contact_email') or item.get('owner_email') or ''}"
